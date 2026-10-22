@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Собрания подростков</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       Токены. Форма, типографика и акцент — из дизайн-системы
+       church-spb-finance-app (docs/design-system.md). Поверхности и
+       текст — из themeParams Telegram (--tg-theme-*), с запасными
+       значениями для работы вне Telegram.
+       ============================================================ */
+    :root {
+      --font-sans: "Inter", -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+      --fb-page: #f7f7f7;
+      --fb-card: #ffffff;
+      --fb-strong: #eef0f3;
+      --fb-hairline: #dee1e6;
+      --fb-ink: #0a0b0d;
+      --fb-body: #5b616e;
+      --fb-muted: #7c828a;
+
+      --color-primary: #0052ff;
+      --color-primary-active: #003ecc;
+      --color-on-primary: #ffffff;
+      --color-up: #05b169;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-pill: 100px;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+
+      --shadow-sm: 0 4px 12px rgba(10, 11, 13, 0.04);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    :root[data-theme="dark"] {
+      --fb-page: #0a0b0d;
+      --fb-card: #16181c;
+      --fb-strong: #22252b;
+      --fb-hairline: #2a2d33;
+      --fb-ink: #ffffff;
+      --fb-body: #c4c7cc;
+      --fb-muted: #a8acb3;
+
+      --color-primary: #578bfa;
+      --color-primary-active: #3f74e8;
+      --color-up: #2fbf7d;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    :root {
+      --page: var(--tg-theme-secondary-bg-color, var(--fb-page));
+      --card: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, var(--fb-card)));
+      --strong: var(--fb-strong);
+      --hairline: var(--tg-theme-section-separator-color, var(--fb-hairline));
+      --ink: var(--tg-theme-text-color, var(--fb-ink));
+      --body: var(--tg-theme-subtitle-text-color, var(--fb-body));
+      --muted: var(--tg-theme-hint-color, var(--fb-muted));
+    }
+
+    /* Тема выбрана вручную — палитра Telegram игнорируется, иначе «светлая»
+       внутри тёмного Telegram осталась бы тёмной. */
+    :root[data-theme-manual] {
+      --page: var(--fb-page);
+      --card: var(--fb-card);
+      --hairline: var(--fb-hairline);
+      --ink: var(--fb-ink);
+      --body: var(--fb-body);
+      --muted: var(--fb-muted);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    html { background: var(--page); }
+
+    body {
+      margin: 0 auto;
+      max-width: 480px;
+      min-height: 100vh;
+      padding: 0 var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+      background: var(--page);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button { font-family: inherit; }
+
+    /* ============================================================
+       Вкладки
+       ============================================================ */
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: var(--space-3) 0;
+      background: var(--page);
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .tabs {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: var(--radius-pill);
+      background: var(--strong);
+    }
+
+    .tab {
+      flex: 1 1 auto;
+      padding: 10px 10px;
+      white-space: nowrap;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s var(--ease), color 0.15s var(--ease);
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab:active { opacity: 0.7; }
+
+    .tab .short { display: none; }
+    @media (max-width: 370px) {
+      .tab .full { display: none; }
+      .tab .short { display: inline; }
+    }
+
+    .theme {
+      position: relative;
+      flex: none;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: var(--strong);
+      color: var(--body);
+      cursor: pointer;
+    }
+
+    .icon-btn svg { width: 20px; height: 20px; }
+    .icon-btn:active { opacity: 0.7; }
+
+    .theme-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 3;
+      min-width: 200px;
+      margin: 0;
+      padding: var(--space-1);
+      list-style: none;
+      background: var(--card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 24px rgba(10, 11, 13, 0.12);
+    }
+
+    .theme-menu button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--ink);
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .theme-menu button:active { background: var(--strong); }
+    .theme-menu .check { color: var(--color-primary); visibility: hidden; }
+    .theme-menu [aria-checked="true"] .check { visibility: visible; }
+
+    .month {
+      margin: var(--space-3) var(--space-1) 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .month:first-child { margin-top: 0; }
+
+    .tab:focus-visible,
+    .btn:focus-visible,
+    .icon-btn:focus-visible,
+    .theme-menu button:focus-visible,
+    .copy-id:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    /* ============================================================
+       Карточки событий
+       ============================================================ */
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+    }
+
+    .event-head {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-2);
+    }
+
+    .event-date {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.3px;
+    }
+
+    .event-date .weekday { color: var(--muted); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--strong);
+      color: var(--body);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+    }
+
+    .badge.yes { color: var(--color-up); }
+    .badge.yes::before { background: currentColor; }
+
+    .event-title {
+      margin: var(--space-3) 0 0;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .event-topic {
+      margin: var(--space-3) 0 0;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .event-topic .label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .topic-link {
+      color: var(--color-primary);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+      text-decoration-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    }
+
+    .topic-link svg {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-left: 3px;
+      vertical-align: -1px;
+    }
+
+    .topic-link:active { opacity: 0.7; }
+    .topic-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: 4px; }
+
+    .tentative {
+      display: inline-block;
+      margin-top: var(--space-2);
+      padding: 2px 8px;
+      border: 1px dashed var(--hairline);
+      border-radius: var(--radius-pill);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .section-label {
+      margin: var(--space-4) 0 var(--space-2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .people {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 6px 0;
+      font-size: 15px;
+    }
+
+    .avatar {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--strong);
+      color: var(--body);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .lunch {
+      margin: 0;
+      color: var(--body);
+    }
+
+    /* ============================================================
+       Школьники
+       ============================================================ */
+    .search {
+      display: block;
+      position: relative;
+      margin-bottom: var(--space-4);
+    }
+
+    .search svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search input {
+      width: 100%;
+      height: 44px;
+      padding: 0 16px 0 44px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      background: var(--card);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 16px; /* меньше 16px — iOS зумит страницу при фокусе */
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .search input::placeholder { color: var(--muted); }
+    .search input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+    .search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+    .count {
+      margin: 0 var(--space-1) var(--space-2);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .list {
+      margin: 0;
+      padding: 0 var(--space-4);
+      list-style: none;
+    }
+
+    .student {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .student:last-child { border-bottom: none; }
+
+    .student-main { flex: 1; min-width: 0; }
+
+    .student-name {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .student-mentor {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .student-age {
+      flex: none;
+      color: var(--body);
+      font-size: 13px;
+    }
+
+    .student-age .num {
+      font-family: var(--font-mono);
+      font-weight: 500;
+    }
+
+    .note {
+      padding: var(--space-5) var(--space-4);
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* ============================================================
+       Состояния: скелетон, ошибка, нет доступа
+       ============================================================ */
+    .skeleton .bar {
+      height: 14px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, var(--strong) 0%, var(--hairline) 50%, var(--strong) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s linear infinite;
+    }
+
+    .skeleton .bar + .bar { margin-top: var(--space-3); }
+    .skeleton .bar.lg { width: 55%; height: 22px; }
+    .skeleton .bar.md { width: 80%; }
+    .skeleton .bar.sm { width: 40%; }
+    .skeleton .bar.tabs { height: 44px; margin: var(--space-3) 0 var(--space-1); }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    .state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 12vh;
+      padding: var(--space-6) var(--space-5);
+      text-align: center;
+    }
+
+    .state-icon {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      margin-bottom: var(--space-4);
+      border-radius: 50%;
+      background: var(--strong);
+      color: var(--body);
+    }
+
+    .state-icon svg { width: 26px; height: 26px; }
+
+    .state h1 {
+      margin: 0 0 var(--space-2);
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .state p {
+      margin: 0;
+      max-width: 300px;
+      color: var(--body);
+    }
+
+    .copy-id {
+      margin: var(--space-5) 0 var(--space-3);
+      padding: var(--space-3) var(--space-5);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      -webkit-user-select: all;
+      user-select: all;
+    }
+
+    .copy-hint {
+      margin-top: var(--space-2);
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 18px;
+    }
+
+    .state .code {
+      margin-top: var(--space-3);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .btn {
+      margin-top: var(--space-5);
+      height: 44px;
+      padding: 0 24px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:active { background: var(--color-primary-active); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton .bar { animation: none; }
+      .tab { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top" id="top" hidden>
+    <div class="top-row">
+      <div class="tabs" role="tablist" aria-label="Разделы">
+        <button class="tab" role="tab" id="tab-events" aria-controls="view-events" aria-selected="true"><span class="full">Субботние собрания</span><span class="short">Собрания</span></button>
+        <button class="tab" role="tab" id="tab-students" aria-controls="view-students" aria-selected="false">Школьники</button>
+      </div>
+      <div class="theme">
+        <button class="icon-btn" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu"></button>
+        <ul class="theme-menu" id="theme-menu" role="menu" hidden>
+          <li role="none"><button role="menuitemradio" data-mode="auto"><span id="theme-auto-label">Как в Telegram</span><span class="check">✓</span></button></li>
+          <li role="none"><button role="menuitemradio" data-mode="light"><span>Светлая</span><span class="check">✓</span></button></li>
+          <li role="none"><button role="menuitemradio" data-mode="dark"><span>Тёмная</span><span class="check">✓</span></button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-loading" class="stack skeleton" aria-busy="true" aria-label="Загрузка">
+      <div class="bar tabs"></div>
+      <div class="card"><div class="bar lg"></div><div class="bar md"></div><div class="bar sm"></div></div>
+      <div class="card"><div class="bar lg"></div><div class="bar md"></div><div class="bar sm"></div></div>
+      <div class="card"><div class="bar lg"></div><div class="bar md"></div></div>
+    </section>
+
+    <section id="view-events" class="stack" role="tabpanel" aria-labelledby="tab-events" hidden></section>
+
+    <section id="view-students" role="tabpanel" aria-labelledby="tab-students" hidden>
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search" type="search" placeholder="Поиск по имени" autocomplete="off" aria-label="Поиск по имени">
+      </label>
+      <p class="count" id="count" aria-live="polite"></p>
+      <div class="card" style="padding: 0"><ul class="list" id="students"></ul></div>
+    </section>
+
+    <section id="view-state" class="state" hidden></section>
+  </main>
+
+  <script>
+    // Адрес развёрнутого Apps Script (…/exec). См. README, шаг «Фронтенд».
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwS5ImTXtfMPexBK3fb1CuXlwjoJsYsHABcTZIMjQsr9HdnvWzBth-pgDeB2Uicz8DoJA/exec';
+
+    const TZ = 'Europe/Moscow';
+    const params = new URLSearchParams(location.search);
+    // ?mock=1 — фикстуры без API; ?mock=forbidden / ?mock=error — экраны состояний.
+    const MOCK = params.get('mock');
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const inTelegram = !!(tg && tg.initData);
+
+    const $ = (id) => document.getElementById(id);
+    let students = [];
+    let warnings = [];
+
+    // ---------------------------------------------------------------- Telegram
+
+    // Тема: 'auto' — как в Telegram (вне Telegram — как в системе), 'light' / 'dark' — вручную.
+    // Выбор хранится только на этом устройстве.
+    const THEME_KEY = 'yp-theme';
+    const THEME_ICONS = {
+      auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>',
+      light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>',
+      dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>',
+    };
+    const THEME_NAMES = { auto: 'авто', light: 'светлая', dark: 'тёмная' };
+
+    function themeMode() {
+      if (params.get('theme')) return params.get('theme');
+      try {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === 'light' || saved === 'dark') return saved;
+      } catch (e) { /* хранилище недоступно */ }
+      return 'auto';
+    }
+
+    function applyTheme() {
+      const mode = themeMode();
+      const root = document.documentElement;
+      const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+      const autoScheme = inTelegram && tg.colorScheme ? tg.colorScheme : (systemDark ? 'dark' : 'light');
+      root.dataset.theme = mode === 'auto' ? autoScheme : mode;
+      if (mode === 'auto') delete root.dataset.themeManual;
+      else root.dataset.themeManual = '';
+
+      $('theme-btn').innerHTML = THEME_ICONS[mode];
+      $('theme-btn').setAttribute('aria-label', 'Тема: ' + THEME_NAMES[mode]);
+      document.querySelectorAll('#theme-menu [data-mode]').forEach((b) => {
+        b.setAttribute('aria-checked', String(b.dataset.mode === mode));
+      });
+      paintTelegramChrome(mode);
+    }
+
+    // Шапка и фон Telegram под цвет страницы.
+    function paintTelegramChrome(mode) {
+      if (!tg || !tg.isVersionAtLeast) return;
+      try {
+        if (mode === 'auto') {
+          if (tg.isVersionAtLeast('6.1')) {
+            tg.setHeaderColor('secondary_bg_color');
+            tg.setBackgroundColor('secondary_bg_color');
+          }
+        } else if (tg.isVersionAtLeast('6.9')) {
+          const page = getComputedStyle(document.documentElement).getPropertyValue('--fb-page').trim();
+          tg.setHeaderColor(page);
+          tg.setBackgroundColor(page);
+          if (tg.isVersionAtLeast('7.10')) tg.setBottomBarColor(page);
+        }
+      } catch (e) { /* старые клиенты */ }
+    }
+
+    function setThemeMode(mode) {
+      try {
+        if (mode === 'auto') localStorage.removeItem(THEME_KEY);
+        else localStorage.setItem(THEME_KEY, mode);
+      } catch (e) { /* хранилище недоступно — тема действует до закрытия */ }
+      params.delete('theme');
+      applyTheme();
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    }
+
+    function toggleThemeMenu(open) {
+      $('theme-menu').hidden = !open;
+      $('theme-btn').setAttribute('aria-expanded', String(open));
+    }
+
+    function initTheme() {
+      $('theme-auto-label').textContent = inTelegram ? 'Как в Telegram' : 'Как в системе';
+      $('theme-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleThemeMenu($('theme-menu').hidden);
+      });
+      $('theme-menu').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-mode]');
+        if (!b) return;
+        setThemeMode(b.dataset.mode);
+        toggleThemeMenu(false);
+      });
+      document.addEventListener('click', () => toggleThemeMenu(false));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleThemeMenu(false); });
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+      applyTheme();
+    }
+
+    function initTelegram() {
+      if (!tg) return;
+      tg.ready();
+      tg.expand();
+      tg.onEvent('themeChanged', applyTheme);
+    }
+
+    // ---------------------------------------------------------------- Данные
+
+    async function fetchData() {
+      if (MOCK) return mockResponse(MOCK);
+      if (!inTelegram) return { ok: false, error: 'no_init_data' };
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 25000);
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          // text/plain — «простой» запрос без CORS preflight, Apps Script его принимает.
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ initData: tg.initData }),
+          redirect: 'follow',
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function load() {
+      show('loading');
+      let data;
+      try {
+        data = await fetchData();
+      } catch (e) {
+        return renderState('network');
+      }
+      if (!data || !data.ok) return renderState((data && data.error) || 'internal', data);
+      warnings = data.warnings || [];
+      students = data.students || [];
+      renderEvents(data.events || []);
+      renderStudents();
+      show('content');
+    }
+
+    // ---------------------------------------------------------------- Вид
+
+    function show(what) {
+      $('view-loading').hidden = what !== 'loading';
+      $('view-state').hidden = what !== 'state';
+      $('top').hidden = what !== 'content';
+      const tab = currentTab();
+      $('view-events').hidden = what !== 'content' || tab !== 'events';
+      $('view-students').hidden = what !== 'content' || tab !== 'students';
+    }
+
+    function currentTab() {
+      return $('tab-students').getAttribute('aria-selected') === 'true' ? 'students' : 'events';
+    }
+
+    function selectTab(name) {
+      $('tab-events').setAttribute('aria-selected', String(name === 'events'));
+      $('tab-students').setAttribute('aria-selected', String(name === 'students'));
+      $('view-events').hidden = name !== 'events';
+      $('view-students').hidden = name !== 'students';
+      window.scrollTo(0, 0);
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    function initials(name) {
+      return name.replace(/[^\p{L}\s-]/gu, ' ').split(/\s+/).filter(Boolean)
+        .slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+    }
+
+    function plural(n, forms) {
+      const n10 = n % 10, n100 = n % 100;
+      if (n10 === 1 && n100 !== 11) return forms[0];
+      if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return forms[1];
+      return forms[2];
+    }
+
+    const dayMonthFmt = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, day: 'numeric', month: 'long' });
+    const weekdayFmt = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, weekday: 'long' });
+    const monthFmt = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, month: 'long' });
+
+    function renderEvents(events) {
+      const root = $('view-events');
+      root.replaceChildren();
+      if (!events.length) {
+        const text = warnings.includes('schedule_sheets_missing')
+          ? 'В таблице не найден лист расписания текущего сезона.'
+          : 'Предстоящих собраний пока нет.';
+        root.append(Object.assign(el('div', 'card note'), { textContent: text }));
+        return;
+      }
+
+      // Список длинный — разбиваем по месяцам; год пишем, только если он не текущий.
+      const thisYear = new Date().getFullYear();
+      let lastMonth = '';
+      events.forEach((ev) => {
+        const date = new Date(ev.date + 'T12:00:00+03:00');
+        const monthKey = ev.date.slice(0, 7);
+        if (monthKey !== lastMonth) {
+          lastMonth = monthKey;
+          const name = monthFmt.format(date);
+          const year = Number(ev.date.slice(0, 4));
+          root.append(el('h3', 'month', name[0].toUpperCase() + name.slice(1) + (year !== thisYear ? ' ' + year : '')));
+        }
+        const card = el('article', 'card');
+
+        const head = el('div', 'event-head');
+        const h = el('h2', 'event-date', dayMonthFmt.format(date) + ', ');
+        h.append(el('span', 'weekday', weekdayFmt.format(date)));
+        const yes = ev.meeting === 'yes';
+        head.append(h, el('span', 'badge ' + (yes ? 'yes' : 'no'), 'Собрание: ' + (yes ? 'да' : 'нет')));
+        card.append(head);
+
+        if (ev.title) {
+          const topic = el('p', yes ? 'event-topic' : 'event-title');
+          if (yes) topic.append(el('span', 'label', 'Тема: '));
+          topic.append(ev.link ? topicLink(ev.title, ev.link) : document.createTextNode(ev.title));
+          card.append(topic);
+        }
+        if (ev.tentative) card.append(el('span', 'tentative', 'пока не подтверждено'));
+
+        if (yes) {
+          if (ev.servers.length) {
+            card.append(el('div', 'section-label', 'Служащие'));
+            const ul = el('ul', 'people');
+            ev.servers.forEach((name) => {
+              const li = el('li', 'person');
+              li.append(el('span', 'avatar', initials(name)), el('span', null, name));
+              ul.append(li);
+            });
+            card.append(ul);
+          }
+          if (ev.lunch.length) {
+            card.append(el('div', 'section-label', 'Обед'), el('p', 'lunch', ev.lunch.join(', ')));
+          }
+        }
+        root.append(card);
+      });
+    }
+
+    // Ссылка на урок: только http(s); в Telegram открываем через openLink (внутренний браузер).
+    function topicLink(text, url) {
+      if (!/^https?:\/\//i.test(url)) return document.createTextNode(text);
+      const a = el('a', 'topic-link', text);
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = '<path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      a.append(icon);
+      a.addEventListener('click', (e) => {
+        if (inTelegram && tg.openLink) {
+          e.preventDefault();
+          tg.openLink(url);
+        }
+      });
+      return a;
+    }
+
+    const normalize = (s) => s.toLowerCase().replace(/ё/g, 'е');
+
+    function renderStudents() {
+      const query = normalize($('search').value.trim());
+      const list = query ? students.filter((s) => normalize(s.name).includes(query)) : students;
+
+      const n = list.length;
+      $('count').textContent = n + ' ' + plural(n, ['школьник', 'школьника', 'школьников']) +
+        (query ? ' из ' + students.length : '');
+
+      const ul = $('students');
+      ul.replaceChildren();
+      if (!n) {
+        const text = warnings.includes('students_sheet_missing')
+          ? 'В таблице не найден лист «Список школьников».'
+          : (query ? 'Никого не нашли' : 'Список пуст');
+        ul.append(el('li', 'note', text));
+        return;
+      }
+      list.forEach((s) => {
+        const li = el('li', 'student');
+        const main = el('div', 'student-main');
+        main.append(el('div', 'student-name', s.name));
+        if (s.mentor) main.append(el('div', 'student-mentor', 'Служащий: ' + s.mentor));
+        li.append(el('span', 'avatar', initials(s.name)), main);
+        if (s.age != null) {
+          const age = el('span', 'student-age', ' ' + plural(s.age, ['год', 'года', 'лет']));
+          age.prepend(el('span', 'num', String(s.age)));
+          li.append(age);
+        }
+        ul.append(li);
+      });
+    }
+
+    const ICONS = {
+      lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+      cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.5-8.97A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5H7z"/><path d="m4 4 16 16"/></svg>',
+      send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3z"/><path d="m10 13 4-4"/></svg>',
+      gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+    };
+
+    function renderState(error, data) {
+      const root = $('view-state');
+      root.replaceChildren();
+      const add = (icon, title, text) => {
+        const i = el('div', 'state-icon');
+        i.innerHTML = ICONS[icon];
+        root.append(i, el('h1', null, title), el('p', null, text));
+      };
+      const retry = () => {
+        const b = el('button', 'btn', 'Повторить');
+        b.addEventListener('click', load);
+        root.append(b);
+      };
+
+      if (error === 'forbidden') {
+        // Если подпись не прошла, сервер не отдаёт userId — берём его из initDataUnsafe, только для показа.
+        const unsafeUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+        const userId = (data && data.userId) || (unsafeUser && unsafeUser.id);
+        if (!userId) {
+          add('lock', 'Нет доступа', 'Обратитесь к администратору.');
+        } else {
+          const icon = el('div', 'state-icon');
+          icon.innerHTML = ICONS.lock;
+          const idBtn = el('button', 'copy-id', String(userId));
+          idBtn.setAttribute('aria-label', 'Ваш Telegram ID ' + userId + ', нажмите, чтобы скопировать');
+          const hint = el('div', 'copy-hint', 'Ваш Telegram ID · нажмите, чтобы скопировать');
+          idBtn.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(String(userId));
+              hint.textContent = 'Скопировано';
+              if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } catch (e) {
+              hint.textContent = 'Выделите номер и скопируйте вручную';
+            }
+          });
+          root.append(icon, el('h1', null, 'Нет доступа'), idBtn,
+            el('p', null, 'Отправьте этот номер администратору, чтобы вас добавили.'), hint);
+        }
+        // Без userId от сервера — подпись initData не сошлась (обычно BOT_TOKEN от другого бота).
+        if (!(data && data.userId)) root.append(el('div', 'code', 'bad_signature'));
+      } else if (error === 'no_init_data') {
+        add('send', 'Откройте в Telegram', 'Это приложение работает только внутри Telegram — через кнопку меню бота.');
+      } else if (error === 'auth_expired') {
+        add('lock', 'Сессия устарела', 'Закройте приложение и откройте его заново.');
+      } else if (error === 'network') {
+        add('cloud', 'Нет связи', 'Не удалось загрузить данные. Проверьте интернет и попробуйте ещё раз.');
+        retry();
+      } else if (/^config_|_missing$/.test(error)) {
+        add('gear', 'Приложение не настроено', 'Сообщите администратору код ниже.');
+        root.append(el('div', 'code', error));
+      } else {
+        add('cloud', 'Что-то пошло не так', 'Попробуйте ещё раз через минуту.');
+        root.append(el('div', 'code', error));
+        retry();
+      }
+      show('state');
+    }
+
+    // ---------------------------------------------------------------- Моки (?mock=1)
+
+    function nextSaturdays(count) {
+      const today = new Date(new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date()) + 'T00:00:00Z');
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7));
+      return Array.from({ length: count }, (_, i) => {
+        const x = new Date(d);
+        x.setUTCDate(d.getUTCDate() + 7 * i);
+        return x.toISOString().slice(0, 10);
+      });
+    }
+
+    function mockResponse(mode) {
+      const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+      return delay(700).then(() => {
+        if (mode === 'error') throw new Error('mock network error');
+        if (mode === 'forbidden') return { ok: false, error: 'forbidden', userId: 123456789 };
+        const [d1, d2, d3, d4, d5, d6, , d8] = nextSaturdays(8); // 7-я суббота не запланирована
+        return {
+          ok: true,
+          user: { id: 1, firstName: 'Тест' },
+          generatedAt: new Date().toISOString(),
+          events: [
+            { date: d1, title: 'Международная конференция в Москве', tentative: false, meeting: 'no', servers: [], lunch: [] },
+            { date: d2, title: 'Вкушение Христа', link: 'https://example.org/lesson-1-13', tentative: false, meeting: 'yes',
+              servers: ['Иван Образцов', 'Пётр Примеров (?)', 'Мария Условная', 'Ольга Пробная? Анна Тестова'],
+              lunch: ['Елена Макетова', 'Светлана Шаблонова'] },
+            { date: d3, title: '', tentative: false, meeting: 'yes',
+              servers: ['Андрей Выдумкин', 'Сергей Заглушкин', 'Наталья Фиктивная', 'Юлия Черновикова'], lunch: [] },
+            { date: d4, title: 'Мини-конференция', tentative: true, meeting: 'no', servers: [], lunch: [] },
+            { date: d5, title: 'Тело Христа', link: 'https://example.org/lesson-1-14', tentative: false, meeting: 'yes',
+              servers: ['Иван Образцов', 'Наталья Фиктивная', 'Мария Условная'], lunch: ['Елена Макетова'] },
+            { date: d6, title: 'Свадьба', tentative: false, meeting: 'no', servers: [], lunch: [] },
+            { date: d8, title: '', tentative: false, meeting: 'yes',
+              servers: ['Андрей Выдумкин', 'Пётр Примеров', 'Ольга Пробная', 'Юлия Черновикова'], lunch: [] },
+          ],
+          students: [
+            { name: 'Выдумкина Вера', age: null, mentor: 'Толя/Анан?' },
+            { name: 'Ёжиков Глеб', age: 14, mentor: 'Петя' },
+            { name: 'Макетова Жанна', age: 15, mentor: '' },
+            { name: 'Образцова Дарья', age: 13, mentor: '' },
+            { name: 'Примеров Борис', age: 17, mentor: 'Володя, Миша Д.' },
+            { name: 'Пробный Зиновий', age: 13, mentor: 'Коля' },
+            { name: 'Тестова Алиса', age: 16, mentor: 'Володя, Миша Д.' },
+            { name: 'Условный Егор', age: 14, mentor: '' },
+            { name: 'Шаблонова Ирина', age: 12, mentor: '' },
+            { name: 'Черновиков Лев', age: 11, mentor: 'Коля' },
+            { name: 'Фиктивная Ксения', age: 16, mentor: '' },
+          ].sort((a, b) => (a.age ?? 999) - (b.age ?? 999) || a.name.localeCompare(b.name, 'ru')),
+        };
+      });
+    }
+
+    // ---------------------------------------------------------------- Старт
+
+    $('tab-events').addEventListener('click', () => selectTab('events'));
+    $('tab-students').addEventListener('click', () => selectTab('students'));
+    $('search').addEventListener('input', () => renderStudents());
+    if (params.get('tab') === 'students') selectTab('students');
+
+    initTelegram();
+    initTheme();
+    load();
+  </script>
+</body>
+</html>
