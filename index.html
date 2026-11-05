@@ -156,11 +156,37 @@
 
     .tab:active { opacity: 0.7; }
 
-    .tab .short { display: none; }
-    @media (max-width: 370px) {
-      .tab .full { display: none; }
-      .tab .short { display: inline; }
-    }
+    .event-kind { font-size: 12px; font-weight: 600; margin-bottom: var(--space-2); }
+    .event-kind.saturday { color: var(--color-primary); }
+    .event-kind.coordination { color: var(--ink); }
+    .event-kind.coordination::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--color-up); }
+    .meeting-card { scroll-margin-top: 100px; }
+    .meeting-card:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .calendar { padding: var(--space-3) var(--space-4); }
+    .calendar summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+    .calendar-hint { color: var(--muted); font-size: 12px; font-weight: 400; }
+    .calendar summary .calendar-hint { margin-left: 8px; }
+    .calendar-nav { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-3); }
+    .calendar-nav h2 { margin: 0; font-size: 15px; }
+    .calendar-nav-btn, .calendar-today { border: none; border-radius: var(--radius-md); background: var(--strong); color: var(--ink); cursor: pointer; }
+    .calendar-nav-btn { width: 44px; height: 44px; font-size: 24px; }
+    .calendar-today { display: block; margin: var(--space-2) auto; padding: 8px 12px; font-size: 12px; }
+    .calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+    .calendar-weekdays { margin: var(--space-3) 0 var(--space-1); color: var(--muted); text-align: center; font-size: 12px; }
+    .calendar-day { position: relative; min-width: 0; height: 44px; padding: 4px 0 12px; border: 1px solid transparent; border-radius: var(--radius-sm); background: var(--strong); color: var(--ink); font-size: 14px; cursor: pointer; }
+    .calendar-day:disabled { background: transparent; color: var(--muted); cursor: default; }
+    .calendar-day[aria-current="date"] { border-color: var(--color-primary); }
+    .calendar-day[aria-pressed="true"] { background: var(--card); border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+    .calendar-dots { position: absolute; bottom: 5px; left: 0; right: 0; display: flex; justify-content: center; gap: 3px; }
+    .calendar-dot { display: inline-block; flex: none; width: 5px; height: 5px; border-radius: 50%; }
+    .calendar-dot.saturday { background: var(--color-primary); }
+    .calendar-dot.coordination { background: var(--color-up); }
+    .calendar-legend { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: var(--space-3); font-size: 11px; color: var(--body); }
+    .calendar-legend span { display: flex; align-items: center; gap: 5px; }
+    .calendar button:focus-visible, .calendar summary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    .coordination-time { color: var(--muted); margin: var(--space-2) 0 0; }
+    .coordination-location { margin: var(--space-2) 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 
     .theme {
       position: relative;
@@ -591,8 +617,8 @@
   <header class="top" id="top" hidden>
     <div class="top-row">
       <div class="tabs" role="tablist" aria-label="Разделы">
-        <button class="tab" role="tab" id="tab-events" aria-controls="view-events" aria-selected="true"><span class="full">Субботние собрания</span><span class="short">Собрания</span></button>
-        <button class="tab" role="tab" id="tab-students" aria-controls="view-students" aria-selected="false">Школьники</button>
+        <button class="tab" role="tab" id="tab-events" aria-controls="view-events" aria-selected="true">Собрание</button>
+        <button class="tab" role="tab" id="tab-students" tabindex="-1" aria-controls="view-students" aria-selected="false">Школьники</button>
       </div>
       <div class="theme">
         <button class="icon-btn" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu"></button>
@@ -613,7 +639,23 @@
       <div class="card"><div class="bar lg"></div><div class="bar md"></div></div>
     </section>
 
-    <section id="view-events" class="stack" role="tabpanel" aria-labelledby="tab-events" hidden></section>
+    <section id="view-events" class="stack" role="tabpanel" aria-labelledby="tab-events" hidden>
+      <details class="card calendar" id="calendar">
+        <summary>Календарь <span class="calendar-hint">показать / скрыть</span></summary>
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" id="calendar-prev" aria-label="Предыдущий месяц">‹</button>
+          <h2 id="calendar-month" aria-live="polite"></h2>
+          <button class="calendar-nav-btn" id="calendar-next" aria-label="Следующий месяц">›</button>
+        </div>
+        <button class="calendar-today" id="calendar-today">Текущий месяц</button>
+        <div class="calendar-weekdays" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+        <div class="calendar-days" id="calendar-days" role="group" aria-labelledby="calendar-month"></div>
+        <div class="calendar-legend"><span><i class="calendar-dot saturday"></i> Собрание школьников</span><span><i class="calendar-dot coordination"></i> Координация</span></div>
+        <p class="calendar-hint">Нажмите на отмеченную дату, чтобы перейти к событиям.</p>
+      </details>
+      <div id="meeting-notices" class="stack" aria-live="polite"></div>
+      <div id="meeting-list" class="stack"></div>
+    </section>
 
     <section id="view-students" role="tabpanel" aria-labelledby="tab-students" hidden>
       <label class="search">
@@ -641,6 +683,10 @@
     const $ = (id) => document.getElementById(id);
     let students = [];
     let warnings = [];
+    let meetingEntries = [];
+    let calendarMonth = '';
+    let calendarSelection = '';
+    let calendarTargets = new Map();
 
     // ---------------------------------------------------------------- Telegram
 
@@ -773,7 +819,7 @@
       if (!data || !data.ok) return renderState((data && data.error) || 'internal', data);
       warnings = data.warnings || [];
       students = data.students || [];
-      renderEvents(data.events || []);
+      renderMeetings(data.events || [], data.coordinations || []);
       renderStudents();
       show('content');
     }
@@ -789,15 +835,18 @@
       $('view-students').hidden = what !== 'content' || tab !== 'students';
     }
 
+    const TABS = ['events', 'students'];
+
     function currentTab() {
-      return $('tab-students').getAttribute('aria-selected') === 'true' ? 'students' : 'events';
+      return TABS.find((name) => $('tab-' + name).getAttribute('aria-selected') === 'true') || 'events';
     }
 
     function selectTab(name) {
-      $('tab-events').setAttribute('aria-selected', String(name === 'events'));
-      $('tab-students').setAttribute('aria-selected', String(name === 'students'));
-      $('view-events').hidden = name !== 'events';
-      $('view-students').hidden = name !== 'students';
+      TABS.forEach((tab) => {
+        $('tab-' + tab).setAttribute('aria-selected', String(name === tab));
+        $('tab-' + tab).tabIndex = name === tab ? 0 : -1;
+        $('view-' + tab).hidden = name !== tab;
+      });
       window.scrollTo(0, 0);
       if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
@@ -825,63 +874,190 @@
     const weekdayFmt = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, weekday: 'long' });
     const monthFmt = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, month: 'long' });
 
-    function renderEvents(events) {
-      const root = $('view-events');
-      root.replaceChildren();
-      if (!events.length) {
-        const text = warnings.includes('schedule_sheets_missing')
-          ? 'В таблице не найден лист расписания текущего сезона.'
-          : 'Предстоящих собраний пока нет.';
-        root.append(Object.assign(el('div', 'card note'), { textContent: text }));
-        return;
+    function saturdayCard(ev) {
+      const date = new Date(ev.date + 'T12:00:00+03:00');
+      const card = el('article', 'card meeting-card');
+      card.append(el('div', 'event-kind saturday', 'Субботнее собрание школьников'));
+
+      const head = el('div', 'event-head');
+      const h = el('h2', 'event-date', dayMonthFmt.format(date) + ', ');
+      h.append(el('span', 'weekday', weekdayFmt.format(date)));
+      const yes = ev.meeting === 'yes';
+      head.append(h, el('span', 'badge ' + (yes ? 'yes' : 'no'), 'Собрание: ' + (yes ? 'да' : 'нет')));
+      card.append(head);
+
+      if (ev.title) {
+        const topic = el('p', yes ? 'event-topic' : 'event-title');
+        if (yes) topic.append(el('span', 'label', 'Тема: '));
+        topic.append(ev.link ? topicLink(ev.title, ev.link) : document.createTextNode(ev.title));
+        card.append(topic);
       }
+      if (ev.tentative) card.append(el('span', 'tentative', 'пока не подтверждено'));
 
-      // Список длинный — разбиваем по месяцам; год пишем, только если он не текущий.
-      const thisYear = new Date().getFullYear();
+      if (yes) {
+        if (ev.servers.length) {
+          card.append(el('div', 'section-label', 'Служащие'));
+          const ul = el('ul', 'people');
+          ev.servers.forEach((name) => {
+            const li = el('li', 'person');
+            li.append(el('span', 'avatar', initials(name)), el('span', null, name));
+            ul.append(li);
+          });
+          card.append(ul);
+        }
+        if (ev.lunch.length) {
+          card.append(el('div', 'section-label', 'Обед'), el('p', 'lunch', ev.lunch.join(', ')));
+        }
+      }
+      return card;
+    }
+
+    const coordinationDateFmt = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric', weekday: 'long',
+    });
+    const coordinationTimeFmt = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: TZ, hour: '2-digit', minute: '2-digit',
+    });
+
+    function coordinationCard(event) {
+      const start = new Date(event.allDay ? event.start + 'T12:00:00+03:00' : event.start);
+      const end = new Date(event.allDay ? event.end + 'T12:00:00+03:00' : event.end);
+      const card = el('article', 'card meeting-card');
+      card.append(el('div', 'event-kind coordination', 'Координация'));
+      card.append(el('h2', 'event-date', event.title));
+      let when = coordinationDateFmt.format(start);
+      if (event.allDay) {
+        // Конец события на весь день в Calendar — исключительная граница.
+        const lastDay = new Date(end.getTime() - 86400000);
+        if (lastDay > start) when += ' — ' + coordinationDateFmt.format(lastDay);
+        when += ' · весь день';
+      } else {
+        const sameDay = coordinationDateFmt.format(start) === coordinationDateFmt.format(end);
+        when += ' · ' + coordinationTimeFmt.format(start) + ' — ' +
+          (sameDay ? '' : coordinationDateFmt.format(end) + ' · ') + coordinationTimeFmt.format(end) + ' (МСК)';
+      }
+      card.append(el('p', 'coordination-time', when));
+      if (event.location) card.append(el('p', 'coordination-location', event.location));
+      return card;
+    }
+
+    // Календарные дни всегда считаем по Москве, независимо от часового пояса устройства.
+    function moscowDate(value) {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+      }).formatToParts(new Date(value));
+      const part = (name) => parts.find((p) => p.type === name).value;
+      return part('year') + '-' + part('month') + '-' + part('day');
+    }
+
+    function mergeMeetings(events, coordinations) {
+      const entries = events.map((event) => ({
+        kind: 'saturday', date: event.date, lastDate: event.date,
+        sort: new Date(event.date + 'T00:00:00+03:00').getTime(), event,
+      }));
+      coordinations.forEach((event) => {
+        const date = event.allDay ? event.start : moscowDate(event.start);
+        const lastDate = event.allDay
+          ? new Date(new Date(event.end + 'T00:00:00Z').getTime() - 86400000).toISOString().slice(0, 10)
+          : moscowDate(new Date(event.end).getTime() - 1);
+        entries.push({ kind: 'coordination', date, lastDate, event,
+          sort: new Date(event.allDay ? date + 'T00:00:00+03:00' : event.start).getTime(),
+        });
+      });
+      return entries.sort((a, b) => a.sort - b.sort || a.kind.localeCompare(b.kind));
+    }
+
+    function renderMeetings(events, coordinations) {
+      meetingEntries = mergeMeetings(events, coordinations);
+      const root = $('meeting-list');
+      const notices = $('meeting-notices');
+      root.replaceChildren();
+      notices.replaceChildren();
+      if (warnings.includes('schedule_sheets_missing')) {
+        notices.append(el('div', 'card note', 'В таблице не найден лист расписания текущего сезона.'));
+      }
+      if (warnings.includes('coordination_calendar_unavailable')) {
+        const note = el('div', 'card note', 'Не удалось загрузить координации. Попробуйте ещё раз.');
+        const retry = el('button', 'btn', 'Повторить');
+        retry.addEventListener('click', load);
+        note.append(retry);
+        notices.append(note);
+      } else if (warnings.includes('config_coordination_calendar_id_missing')) {
+        notices.append(el('div', 'card note', 'Календарь координаций ещё не подключён.'));
+      }
+      if (!meetingEntries.length) root.append(el('div', 'card note', 'Предстоящих событий пока нет.'));
       let lastMonth = '';
-      events.forEach((ev) => {
-        const date = new Date(ev.date + 'T12:00:00+03:00');
-        const monthKey = ev.date.slice(0, 7);
-        if (monthKey !== lastMonth) {
-          lastMonth = monthKey;
-          const name = monthFmt.format(date);
-          const year = Number(ev.date.slice(0, 4));
-          root.append(el('h3', 'month', name[0].toUpperCase() + name.slice(1) + (year !== thisYear ? ' ' + year : '')));
+      meetingEntries.forEach((entry, index) => {
+        const month = entry.date.slice(0, 7);
+        if (month !== lastMonth) {
+          lastMonth = month;
+          const name = calendarMonthTitle(month);
+          root.append(el('h3', 'month', name));
         }
-        const card = el('article', 'card');
-
-        const head = el('div', 'event-head');
-        const h = el('h2', 'event-date', dayMonthFmt.format(date) + ', ');
-        h.append(el('span', 'weekday', weekdayFmt.format(date)));
-        const yes = ev.meeting === 'yes';
-        head.append(h, el('span', 'badge ' + (yes ? 'yes' : 'no'), 'Собрание: ' + (yes ? 'да' : 'нет')));
-        card.append(head);
-
-        if (ev.title) {
-          const topic = el('p', yes ? 'event-topic' : 'event-title');
-          if (yes) topic.append(el('span', 'label', 'Тема: '));
-          topic.append(ev.link ? topicLink(ev.title, ev.link) : document.createTextNode(ev.title));
-          card.append(topic);
-        }
-        if (ev.tentative) card.append(el('span', 'tentative', 'пока не подтверждено'));
-
-        if (yes) {
-          if (ev.servers.length) {
-            card.append(el('div', 'section-label', 'Служащие'));
-            const ul = el('ul', 'people');
-            ev.servers.forEach((name) => {
-              const li = el('li', 'person');
-              li.append(el('span', 'avatar', initials(name)), el('span', null, name));
-              ul.append(li);
-            });
-            card.append(ul);
-          }
-          if (ev.lunch.length) {
-            card.append(el('div', 'section-label', 'Обед'), el('p', 'lunch', ev.lunch.join(', ')));
-          }
-        }
+        const card = entry.kind === 'saturday' ? saturdayCard(entry.event) : coordinationCard(entry.event);
+        card.id = 'meeting-' + index;
+        card.tabIndex = -1;
+        entry.card = card;
         root.append(card);
       });
+      if (!calendarMonth) calendarMonth = moscowDate(Date.now()).slice(0, 7);
+      renderCalendar();
+    }
+
+    function calendarMonthTitle(month) {
+      const date = new Date(month + '-01T12:00:00+03:00');
+      const title = monthFmt.format(date);
+      return title[0].toUpperCase() + title.slice(1) + ' ' + month.slice(0, 4);
+    }
+
+    function changeCalendarMonth(offset) {
+      const date = new Date(calendarMonth + '-01T00:00:00Z');
+      date.setUTCMonth(date.getUTCMonth() + offset);
+      calendarMonth = date.toISOString().slice(0, 7);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const root = $('calendar-days');
+      root.replaceChildren();
+      $('calendar-month').textContent = calendarMonthTitle(calendarMonth);
+      const first = new Date(calendarMonth + '-01T00:00:00Z');
+      const offset = (first.getUTCDay() + 6) % 7;
+      const count = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+      const today = moscowDate(Date.now());
+      calendarTargets = new Map();
+      for (let i = 0; i < offset; i++) {
+        const blank = el('span');
+        blank.setAttribute('aria-hidden', 'true');
+        root.append(blank);
+      }
+      for (let day = 1; day <= count; day++) {
+        const date = calendarMonth + '-' + String(day).padStart(2, '0');
+        const entries = meetingEntries.filter((entry) => entry.date <= date && entry.lastDate >= date);
+        const button = el('button', 'calendar-day', String(day));
+        button.id = 'calendar-day-' + date;
+        button.disabled = !entries.length;
+        button.setAttribute('aria-pressed', String(calendarSelection === date));
+        if (date === today) button.setAttribute('aria-current', 'date');
+        const kinds = [...new Set(entries.map((entry) => entry.kind))];
+        const labels = kinds.map((kind) => kind === 'saturday' ? 'субботнее собрание школьников' : 'координация');
+        button.setAttribute('aria-label', coordinationDateFmt.format(new Date(date + 'T12:00:00+03:00')) +
+          (labels.length ? ': ' + labels.join(', ') : ': событий нет'));
+        const dots = el('span', 'calendar-dots');
+        dots.setAttribute('aria-hidden', 'true');
+        kinds.forEach((kind) => dots.append(el('i', 'calendar-dot ' + kind)));
+        button.append(dots);
+        if (entries.length) calendarTargets.set(date, entries[0].card);
+        button.addEventListener('click', () => {
+          const target = calendarTargets.get(date);
+          if (!target) return;
+          calendarSelection = date;
+          renderCalendar();
+          target.focus({ preventScroll: true });
+          target.scrollIntoView({ behavior: 'auto', block: 'start' });
+        });
+        root.append(button);
+      }
     }
 
     // Ссылка на урок: только http(s); в Telegram открываем через openLink (внутренний браузер).
@@ -1027,6 +1203,12 @@
           ok: true,
           user: { id: 1, firstName: 'Тест' },
           generatedAt: new Date().toISOString(),
+          warnings: mode === 'calendar-error' ? ['coordination_calendar_unavailable'] :
+            mode === 'calendar-missing' ? ['config_coordination_calendar_id_missing'] : [],
+          coordinations: [
+            { title: 'Координация служащих', start: d2 + 'T19:00:00+03:00', end: d2 + 'T20:30:00+03:00', allDay: false, location: 'Зал собраний' },
+            { title: 'Общая координация', start: d4, end: new Date(new Date(d4 + 'T00:00:00Z').getTime() + 86400000).toISOString().slice(0, 10), allDay: true, location: '' },
+          ],
           events: [
             { date: d1, title: 'Международная конференция в Москве', tentative: false, meeting: 'no', servers: [], lunch: [] },
             { date: d2, title: 'Вкушение Христа', link: 'https://example.org/lesson-1-13', tentative: false, meeting: 'yes',
@@ -1060,10 +1242,30 @@
 
     // ---------------------------------------------------------------- Старт
 
-    $('tab-events').addEventListener('click', () => selectTab('events'));
-    $('tab-students').addEventListener('click', () => selectTab('students'));
+    TABS.forEach((name, index) => {
+      const button = $('tab-' + name);
+      button.addEventListener('click', () => selectTab(name));
+      button.addEventListener('keydown', (event) => {
+        let next;
+        if (event.key === 'ArrowRight') next = (index + 1) % TABS.length;
+        if (event.key === 'ArrowLeft') next = (index + TABS.length - 1) % TABS.length;
+        if (event.key === 'Home') next = 0;
+        if (event.key === 'End') next = TABS.length - 1;
+        if (next === undefined) return;
+        event.preventDefault();
+        selectTab(TABS[next]);
+        $('tab-' + TABS[next]).focus();
+      });
+    });
+    $('calendar-prev').addEventListener('click', () => changeCalendarMonth(-1));
+    $('calendar-next').addEventListener('click', () => changeCalendarMonth(1));
+    $('calendar-today').addEventListener('click', () => {
+      calendarMonth = moscowDate(Date.now()).slice(0, 7);
+      renderCalendar();
+    });
     $('search').addEventListener('input', () => renderStudents());
-    if (params.get('tab') === 'students') selectTab('students');
+    if (params.get('tab') === 'coordinations') selectTab('events');
+    else if (TABS.includes(params.get('tab'))) selectTab(params.get('tab'));
 
     initTelegram();
     initTheme();
